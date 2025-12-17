@@ -1,0 +1,125 @@
+<?php
+
+namespace App\Http\Controllers\Mitra;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Booking;
+use App\Models\User;
+use App\Services\NotificationService;
+
+class AntrianController extends Controller
+{
+    public function index()
+    {
+        $mitra = Auth::user();
+
+        // Get only confirmed bookings (not cek_transaksi) for this mitra
+        $antrian = Booking::where('mitra_id', $mitra->id)
+            ->whereIn('status', ['menunggu', 'proses', 'selesai', 'dibatalkan'])
+            ->with(['customer'])
+            ->orderByRaw("FIELD(status, ?, ?, ?, ?)", ['menunggu', 'proses', 'selesai', 'dibatalkan'])
+            ->orderBy('booking_date', 'asc')
+            ->orderBy('booking_time', 'asc')
+            ->get()
+            ->map(function($booking) {
+                return [
+                    'id' => $booking->id,
+                    'booking_code' => $booking->booking_code,
+                    'name' => $booking->customer->name,
+                    'customerName' => $booking->customer->name,
+                    'customerPhone' => $booking->customer->phone ?? '-',
+                    'car' => $booking->vehicle_type . ' - ' . $booking->vehicle_plate,
+                    'service' => $booking->service_type,
+                    'vehicleType' => $booking->vehicle_type,
+                    'vehiclePlate' => $booking->vehicle_plate,
+                    'date' => $booking->booking_date->format('Y-m-d'),
+                    'time' => substr($booking->booking_time, 0, 5),
+                    'price' => 'Rp ' . number_format($booking->base_price, 0, ',', '.'),
+                    'priceRaw' => $booking->base_price,
+                    'status' => $booking->status,
+                    'currentStep' => $booking->status === 'menunggu' ? 0 : ($booking->status === 'proses' ? 1 : 2),
+                    'paymentMethod' => $booking->payment_method,
+                    'paymentProof' => $booking->payment_proof,
+                    'avatar' => $booking->customer->avatar ?? '/images/profile.png',
+                    'lastUpdated' => $booking->updated_at->timestamp * 1000,
+                ];
+            });
+
+        return view('mitra.antrian.antrian', compact('antrian'));
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $mitra = Auth::user();
+
+        // Verify mitra role
+        if ($mitra->role !== 'mitra') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'booking_id' => 'required|integer|min:1',
+            'status' => 'required|in:proses,selesai',
+        ]);
+
+        // Find booking
+        $booking = Booking::where('id', $validated['booking_id'])
+            ->where('mitra_id', $mitra->id)
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking tidak ditemukan'
+            ], 404);
+        }
+
+        // Validate status transition
+        if ($validated['status'] === 'proses' && $booking->status !== 'menunggu') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya booking yang menunggu bisa diproses'
+            ], 400);
+        }
+
+        if ($validated['status'] === 'selesai' && $booking->status !== 'proses') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya booking yang sedang diproses bisa diselesaikan'
+            ], 400);
+        }
+
+        // Update booking status
+        $booking->status = $validated['status'];
+        $booking->save();
+
+        // Send notifications based on status
+        if ($validated['status'] === 'proses') {
+            // Notify customer that service has started
+            NotificationService::bookingStarted($booking);
+        } elseif ($validated['status'] === 'selesai') {
+            // Notify customer that service is completed
+            NotificationService::bookingCompleted($booking);
+
+            // Give 10 points to customer when booking is completed (1 poin = Rp 1)
+            $customer = User::find($booking->customer_id);
+            if ($customer) {
+                $customer->increment('points', 10);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status booking berhasil diupdate',
+            'data' => [
+                'booking_id' => $booking->id,
+                'status' => $booking->status,
+            ]
+        ]);
+    }
+}

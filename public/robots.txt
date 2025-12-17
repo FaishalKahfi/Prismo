@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard-mitra/
+Disallow: /dashboard-customer/
+Disallow: /mitra/
+Disallow: /customer/
+Disallow: /login
+Disallow: /register
+
+Sitemap: /sitemap.xml

@@ -1,0 +1,300 @@
+/* ========================================
+   FONT OPTIMIZATION
+   ======================================== */
+
+/* Preload critical fonts */
+@font-face {
+    font-family: "System";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local("Segoe UI"), local("Roboto"), local("Arial"), local("sans-serif");
+}
+
+/* Use system fonts for better performance */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   IMAGE OPTIMIZATION
+   ======================================== */
+
+/* Responsive images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Lazy loading placeholder */
+img[loading="lazy"] {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+/* WebP support */
+.webp .hero-image {
+    background-image: url("images/hero.webp");
+}
+
+.no-webp .hero-image {
+    background-image: url("images/hero.jpg");
+}
+
+/* ========================================
+   CSS OPTIMIZATION
+   ======================================== */
+
+/* Contain paint for better performance */
+.card,
+.panel,
+.item {
+    contain: layout style paint;
+}
+
+/* Use transform instead of position for animations */
+.animated-item {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+/* Optimize shadows */
+.shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Reduce motion for accessibility and battery */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   CRITICAL CSS - Above the fold
+   ======================================== */
+
+/* Header styles */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation */
+.nav {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+/* Button base */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #f0f0f0;
+        --border-color: #333;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .card,
+    .panel {
+        background-color: #2a2a2a;
+        border-color: var(--border-color);
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Display utilities */
+.d-none {
+    display: none !important;
+}
+.d-block {
+    display: block !important;
+}
+.d-flex {
+    display: flex !important;
+}
+.d-grid {
+    display: grid !important;
+}
+
+/* Spacing utilities */
+.m-0 {
+    margin: 0 !important;
+}
+.mt-1 {
+    margin-top: 0.25rem !important;
+}
+.mt-2 {
+    margin-top: 0.5rem !important;
+}
+.mt-3 {
+    margin-top: 1rem !important;
+}
+.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.p-0 {
+    padding: 0 !important;
+}
+.pt-1 {
+    padding-top: 0.25rem !important;
+}
+.pt-2 {
+    padding-top: 0.5rem !important;
+}
+.pt-3 {
+    padding-top: 1rem !important;
+}
+.pb-1 {
+    padding-bottom: 0.25rem !important;
+}
+.pb-2 {
+    padding-bottom: 0.5rem !important;
+}
+.pb-3 {
+    padding-bottom: 1rem !important;
+}
+
+/* Text utilities */
+.text-center {
+    text-align: center !important;
+}
+.text-left {
+    text-align: left !important;
+}
+.text-right {
+    text-align: right !important;
+}
+
+.text-bold {
+    font-weight: 700 !important;
+}
+.text-normal {
+    font-weight: 400 !important;
+}
+
+/* Color utilities */
+.text-primary {
+    color: #2563eb !important;
+}
+.text-success {
+    color: #16a34a !important;
+}
+.text-danger {
+    color: #dc2626 !important;
+}
+.text-warning {
+    color: #f59e0b !important;
+}
+.text-muted {
+    color: #6b7280 !important;
+}
+
+/* Flex utilities */
+.justify-center {
+    justify-content: center !important;
+}
+.justify-between {
+    justify-content: space-between !important;
+}
+.justify-end {
+    justify-content: flex-end !important;
+}
+.align-center {
+    align-items: center !important;
+}
+.align-start {
+    align-items: flex-start !important;
+}
+.align-end {
+    align-items: flex-end !important;
+}
+
+/* Gap utilities */
+.gap-1 {
+    gap: 0.25rem !important;
+}
+.gap-2 {
+    gap: 0.5rem !important;
+}
+.gap-3 {
+    gap: 1rem !important;
+}
+.gap-4 {
+    gap: 1.5rem !important;
+}
+
+/* Width utilities */
+.w-full {
+    width: 100% !important;
+}
+.w-auto {
+    width: auto !important;
+}
+
+/* Visibility utilities */
+.invisible {
+    visibility: hidden !important;
+}
+.visible {
+    visibility: visible !important;
+}
+
+/* Overflow utilities */
+.overflow-hidden {
+    overflow: hidden !important;
+}
+.overflow-auto {
+    overflow: auto !important;
+}
+.overflow-scroll {
+    overflow: scroll !important;
+}
